@@ -5,9 +5,9 @@
 // > Each thread within each core has it's own register file with 13 free registers and 3 read-only registers
 // > Read-only registers hold the familiar %blockIdx, %blockDim, and %threadIdx values critical to SIMD
 module registers #(
-    parameter THREADS_PER_BLOCK = 4,
-    parameter THREAD_ID = 0,
-    parameter DATA_BITS = 8
+    parameter THREADS_PER_BLOCK = 4,  // 每个块的线程数
+    parameter THREAD_ID = 0,  // 当前线程的ID
+    parameter DATA_BITS = 8  // 数据位宽
 ) (
     input wire clk,
     input wire reset,
@@ -37,9 +37,7 @@ module registers #(
     output reg [7:0] rs,
     output reg [7:0] rt
 );
-    localparam ARITHMETIC = 2'b00,
-        MEMORY = 2'b01,
-        CONSTANT = 2'b10;
+    localparam ARITHMETIC = 2'b00, MEMORY = 2'b01, CONSTANT = 2'b10;
 
     // 16 registers per thread (13 free registers and 3 read-only registers)
     reg [7:0] registers[15:0];
@@ -67,30 +65,31 @@ module registers #(
             registers[13] <= 8'b0;              // %blockIdx
             registers[14] <= THREADS_PER_BLOCK; // %blockDim
             registers[15] <= THREAD_ID;         // %threadIdx
-        end else if (enable) begin 
+        end else if (enable) begin
             // [Bad Solution] Shouldn't need to set this every cycle
             registers[13] <= block_id; // Update the block_id when a new block is issued from dispatcher
-            
+
+            // 没有对寄存器地址进行越界检查(除了写保护), 如果地址解码错误可能访问到未定义的寄存器.
             // Fill rs/rt when core_state = REQUEST
-            if (core_state == 3'b011) begin 
+            if (core_state == 3'b011) begin
                 rs <= registers[decoded_rs_address];
                 rt <= registers[decoded_rt_address];
             end
 
             // Store rd when core_state = UPDATE
-            if (core_state == 3'b110) begin 
+            if (core_state == 3'b110) begin
                 // Only allow writing to R0 - R12
                 if (decoded_reg_write_enable && decoded_rd_address < 13) begin
                     case (decoded_reg_input_mux)
-                        ARITHMETIC: begin 
+                        ARITHMETIC: begin
                             // ADD, SUB, MUL, DIV
                             registers[decoded_rd_address] <= alu_out;
                         end
-                        MEMORY: begin 
+                        MEMORY: begin
                             // LDR
                             registers[decoded_rd_address] <= lsu_out;
                         end
-                        CONSTANT: begin 
+                        CONSTANT: begin
                             // CONST
                             registers[decoded_rd_address] <= decoded_immediate;
                         end

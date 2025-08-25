@@ -20,7 +20,7 @@ module dcr (
         if (reset) begin
             device_conrol_register <= 8'b0;
         end else begin
-            if (device_control_write_enable) begin 
+            if (device_control_write_enable) begin
                 device_conrol_register <= device_control_data;
             end
         end

@@ -47,16 +47,19 @@ module lsu (
             mem_write_address <= 0;
             mem_write_data <= 0;
         end else if (enable) begin
+            // 多个线程可能同时访问相同内存地址, 需要外部内存控制器处理冲突
+            // 没有对同时发起读写请求进行处理, 可能会出现不可预期的行为.
+
             // If memory read enable is triggered (LDR instruction)
-            if (decoded_mem_read_enable) begin 
+            if (decoded_mem_read_enable) begin
                 case (lsu_state)
                     IDLE: begin
                         // Only read when core_state = REQUEST
-                        if (core_state == 3'b011) begin 
+                        if (core_state == 3'b011) begin
                             lsu_state <= REQUESTING;
                         end
                     end
-                    REQUESTING: begin 
+                    REQUESTING: begin
                         mem_read_valid <= 1;
                         mem_read_address <= rs;
                         lsu_state <= WAITING;
@@ -68,9 +71,9 @@ module lsu (
                             lsu_state <= DONE;
                         end
                     end
-                    DONE: begin 
+                    DONE: begin
                         // Reset when core_state = UPDATE
-                        if (core_state == 3'b110) begin 
+                        if (core_state == 3'b110) begin
                             lsu_state <= IDLE;
                         end
                     end
@@ -78,15 +81,15 @@ module lsu (
             end
 
             // If memory write enable is triggered (STR instruction)
-            if (decoded_mem_write_enable) begin 
+            if (decoded_mem_write_enable) begin
                 case (lsu_state)
                     IDLE: begin
                         // Only read when core_state = REQUEST
-                        if (core_state == 3'b011) begin 
+                        if (core_state == 3'b011) begin
                             lsu_state <= REQUESTING;
                         end
                     end
-                    REQUESTING: begin 
+                    REQUESTING: begin
                         mem_write_valid <= 1;
                         mem_write_address <= rs;
                         mem_write_data <= rt;
@@ -98,9 +101,9 @@ module lsu (
                             lsu_state <= DONE;
                         end
                     end
-                    DONE: begin 
+                    DONE: begin
                         // Reset when core_state = UPDATE
-                        if (core_state == 3'b110) begin 
+                        if (core_state == 3'b110) begin
                             lsu_state <= IDLE;
                         end
                     end

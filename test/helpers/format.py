@@ -2,6 +2,7 @@ from typing import List, Optional
 from .logger import logger
 
 def format_register(register: int) -> str:
+    """Formats a register number into its string representation."""
     if register < 13:
         return f"R{register}"
     if register == 13:
@@ -10,8 +11,9 @@ def format_register(register: int) -> str:
         return f"%blockDim"
     if register == 15:
         return f"%threadIdx"
-    
+
 def format_instruction(instruction: str) -> str:
+    """Formats a 16-bit binary instruction into its assembly representation."""
     opcode = instruction[0:4]
     rd = format_register(int(instruction[4:8], 2))
     rs = format_register(int(instruction[8:12], 2))

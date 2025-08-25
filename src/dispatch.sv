@@ -1,4 +1,4 @@
-`default_nettype none
+2`default_nettype none
 `timescale 1ns/1ns
 
 // BLOCK DISPATCH
@@ -48,9 +48,9 @@ module dispatch #(
                 core_block_id[i] <= 0;
                 core_thread_count[i] <= THREADS_PER_BLOCK;
             end
-        end else if (start) begin    
+        end else if (start) begin
             // EDA: Indirect way to get @(posedge start) without driving from 2 different clocks
-            if (!start_execution) begin 
+            if (!start_execution) begin
                 start_execution <= 1;
                 for (int i = 0; i < NUM_CORES; i++) begin
                     core_reset[i] <= 1;
@@ -58,21 +58,21 @@ module dispatch #(
             end
 
             // If the last block has finished processing, mark this kernel as done executing
-            if (blocks_done == total_blocks) begin 
+            if (blocks_done == total_blocks) begin
                 done <= 1;
             end
 
             for (int i = 0; i < NUM_CORES; i++) begin
-                if (core_reset[i]) begin 
+                if (core_reset[i]) begin
                     core_reset[i] <= 0;
 
                     // If this core was just reset, check if there are more blocks to be dispatched
-                    if (blocks_dispatched < total_blocks) begin 
+                    if (blocks_dispatched < total_blocks) begin
                         core_start[i] <= 1;
-                        core_block_id[i] <= blocks_dispatched;
-                        core_thread_count[i] <= (blocks_dispatched == total_blocks - 1) 
-                            ? thread_count - (blocks_dispatched * THREADS_PER_BLOCK)
-                            : THREADS_PER_BLOCK;
+                        core_block_id[i] <= blocks_dispatched;  // 分配块ID
+                        core_thread_count[i] <= (blocks_dispatched == total_blocks - 1)
+                            ? thread_count - (blocks_dispatched * THREADS_PER_BLOCK)  // 最后一块可能不满
+                            : THREADS_PER_BLOCK;  // 其他块满
 
                         blocks_dispatched = blocks_dispatched + 1;
                     end

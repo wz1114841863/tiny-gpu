@@ -19,7 +19,7 @@ module scheduler #(
     input wire clk,
     input wire reset,
     input wire start,
-    
+
     // Control Signals
     input reg decoded_mem_read_enable,
     input reg decoded_mem_write_enable,
@@ -45,24 +45,26 @@ module scheduler #(
         EXECUTE = 3'b101,     // Execute ALU and PC calculations
         UPDATE = 3'b110,      // Update registers, NZP, and PC
         DONE = 3'b111;        // Done executing this block
-    
-    always @(posedge clk) begin 
+
+    always @(posedge clk) begin
         if (reset) begin
             current_pc <= 0;
             core_state <= IDLE;
             done <= 0;
-        end else begin 
+        end else begin
+            // DECODE/REQUEST/EXECUTE/UPDATE都是单周期同步操作
+            // 只有FETCH和WAIT状态可能需要多个周期
             case (core_state)
                 IDLE: begin
                     // Here after reset (before kernel is launched, or after previous block has been processed)
-                    if (start) begin 
+                    if (start) begin
                         // Start by fetching the next instruction for this block based on PC
                         core_state <= FETCH;
                     end
                 end
-                FETCH: begin 
+                FETCH: begin
                     // Move on once fetcher_state = FETCHED
-                    if (fetcher_state == 3'b010) begin 
+                    if (fetcher_state == 3'b010) begin
                         core_state <= DECODE;
                     end
                 end
@@ -70,12 +72,13 @@ module scheduler #(
                     // Decode is synchronous so we move on after one cycle
                     core_state <= REQUEST;
                 end
-                REQUEST: begin 
+                REQUEST: begin
                     // Request is synchronous so we move on after one cycle
                     core_state <= WAIT;
                 end
                 WAIT: begin
                     // Wait for all LSUs to finish their request before continuing
+                    // 所有线程必须等待最慢的内存访问完成
                     reg any_lsu_waiting = 1'b0;
                     for (int i = 0; i < THREADS_PER_BLOCK; i++) begin
                         // Make sure no lsu_state = REQUESTING or WAITING
@@ -94,20 +97,21 @@ module scheduler #(
                     // Execute is synchronous so we move on after one cycle
                     core_state <= UPDATE;
                 end
-                UPDATE: begin 
-                    if (decoded_ret) begin 
+                UPDATE: begin
+                    if (decoded_ret) begin
                         // If we reach a RET instruction, this block is done executing
                         done <= 1;
                         core_state <= DONE;
-                    end else begin 
+                    end else begin
                         // TODO: Branch divergence. For now assume all next_pc converge
+                        // 简单取最后一个线程的PC
                         current_pc <= next_pc[THREADS_PER_BLOCK-1];
 
                         // Update is synchronous so we move on after one cycle
                         core_state <= FETCH;
                     end
                 end
-                DONE: begin 
+                DONE: begin
                     // no-op
                 end
             endcase

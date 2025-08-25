@@ -6,20 +6,41 @@ Built with <15 files of fully documented Verilog, complete documentation on arch
 
 ### Table of Contents
 
+- [tiny-gpu](#tiny-gpu)
+    - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
+  - [What is tiny-gpu?](#what-is-tiny-gpu)
 - [Architecture](#architecture)
   - [GPU](#gpu)
+    - [Device Control Register](#device-control-register)
+    - [Dispatcher](#dispatcher)
   - [Memory](#memory)
+    - [Global Memory](#global-memory)
+    - [Memory Controllers](#memory-controllers)
+    - [Cache (WIP)](#cache-wip)
   - [Core](#core)
+    - [Scheduler](#scheduler)
+    - [Fetcher](#fetcher)
+    - [Decoder](#decoder)
+    - [Register Files](#register-files)
+    - [ALUs](#alus)
+    - [LSUs](#lsus)
+    - [PCs](#pcs)
 - [ISA](#isa)
 - [Execution](#execution)
-  - [Core](#core-1)
-  - [Thread](#thread)
+    - [Core](#core-1)
+    - [Thread](#thread)
 - [Kernels](#kernels)
-  - [Matrix Addition](#matrix-addition)
-  - [Matrix Multiplication](/tree/master?tab=readme-ov-file#matrix-multiplication)
+    - [Matrix Addition](#matrix-addition)
+    - [Matrix Multiplication](#matrix-multiplication)
 - [Simulation](#simulation)
 - [Advanced Functionality](#advanced-functionality)
+    - [Multi-layered Cache \& Shared Memory](#multi-layered-cache--shared-memory)
+    - [Memory Coalescing](#memory-coalescing)
+    - [Pipelining](#pipelining)
+    - [Warp Scheduling](#warp-scheduling)
+    - [Branch Divergence](#branch-divergence)
+    - [Synchronization \& Barriers](#synchronization--barriers)
 - [Next Steps](#next-steps)
 
 # Overview
@@ -57,11 +78,28 @@ After understanding the fundamentals laid out in this project, you can checkout 
 # Architecture
 
 <p float="left">
-  <img src="/docs/images/gpu.png" alt="GPU" width="48%">
-  <img src="/docs/images/core.png" alt="Core" width="48%">
+  <img src="./docs/images/gpu.png" alt="GPU" width="48%">
+  <img src="./docs/images/core.png" alt="Core" width="48%">
 </p>
 
 ## GPU
+
+```
+GPU (顶层)
+├── DCR (设备控制寄存器)
+├── Dispatch (块分发器)
+├── Data Memory Controller (数据内存控制器)
+├── Program Memory Controller (程序内存控制器)
+└── Compute Cores × NUM_CORES (计算核心)
+    ├── Fetcher (指令获取器)
+    ├── Decoder (指令解码器)
+    ├── Scheduler (调度器)
+    └── Thread Units × THREADS_PER_BLOCK (线程单元)
+        ├── ALU (算术逻辑单元)
+        ├── LSU (加载存储单元)
+        ├── Register File (寄存器堆)
+        └── PC (程序计数器)
+```
 
 tiny-gpu is built to execute a single kernel at a time.
 
@@ -180,7 +218,7 @@ In real GPUs, individual threads can branch to different PCs, causing **branch d
 
 # ISA
 
-![ISA](/docs/images/isa.png)
+![ISA](./docs/images/isa.png)
 
 tiny-gpu implements a simple 11 instruction ISA built to enable simple kernels for proof-of-concept like matrix addition & matrix multiplication (implementation further down on this page).
 
@@ -215,7 +253,7 @@ In practice, several of these steps could be compressed to be optimize processin
 
 ### Thread
 
-![Thread](/docs/images/thread.png)
+![Thread](./docs/images/thread.png)
 
 Each thread within each core follows the above execution path to perform computations on the data in it's dedicated register file.
 

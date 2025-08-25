@@ -6,3 +6,7 @@ gds/**/*.gltf
 
 .DS_Store
 results.xml
+
+.venv/
+.vscode/
+__pycache__/

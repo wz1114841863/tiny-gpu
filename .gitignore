@@ -10,3 +10,8 @@ results.xml
 .venv/
 .vscode/
 __pycache__/
+.bsp/
+.metals/
+.scala-build/
+
+target/

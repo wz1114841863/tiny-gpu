@@ -6,15 +6,24 @@
 // > In this minimal implementation, the ALU supports the 4 basic arithmetic operations
 // > Each thread in each core has it's own ALU
 // > ADD, SUB, MUL, DIV instructions are all executed here
+
+/*
+    enable: When the ALU is enabled (i.e., the thread is active)
+    core_state: When the core is in the EXECUTE state (3'b101)
+    decoded_alu_output_mux: When the operation is a compare operation (1)
+    decoded_alu_arithmetic_mux: When the operation is an arithmetic operation (0, 1, 2, or 3)
+    rs, rt: The input register values for the ALU operation
+    alu_out_reg: The output register that holds the result of the ALU operation
+*/
 module alu (
     input wire clk,
     input wire reset,
     input wire enable, // If current block has less threads then block size, some ALUs will be inactive
 
-    input reg [2:0] core_state,
+    input reg [2:0] core_state,  // 101: EXECUTE state
 
-    input reg [1:0] decoded_alu_arithmetic_mux,
-    input reg decoded_alu_output_mux,
+    input reg [1:0] decoded_alu_arithmetic_mux,  // 00: ADD, 01: SUB, 10: MUL, 11: DIV
+    input reg decoded_alu_output_mux,  // 0: arithmetic operation, 1: compare operation
 
     input reg [7:0] rs,
     input reg [7:0] rt,
@@ -24,6 +33,7 @@ module alu (
 
     reg [7:0] alu_out_reg;
     assign alu_out = alu_out_reg;
+
 
     always @(posedge clk) begin
         if (reset) begin
@@ -45,7 +55,7 @@ module alu (
                             alu_out_reg <= rs - rt;
                         end
                         MUL: begin
-                            // 没有考虑溢出
+                            // 没有考虑溢出, 乘法能不能一个周期完成,取决于综合到什么平台,以及工具怎么实现它.
                             alu_out_reg <= rs * rt;
                         end
                         DIV: begin

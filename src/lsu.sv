@@ -26,6 +26,7 @@ module lsu (
     output reg [7:0] mem_read_address,
     input reg mem_read_ready,
     input reg [7:0] mem_read_data,
+    
     output reg mem_write_valid,
     output reg [7:0] mem_write_address,
     output reg [7:0] mem_write_data,

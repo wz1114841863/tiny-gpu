@@ -4,6 +4,7 @@
 // INSTRUCTION FETCHER
 // > Retrieves the instruction at the current PC from global data memory
 // > Each core has it's own fetcher
+
 module fetcher #(
     parameter PROGRAM_MEM_ADDR_BITS = 8,
     parameter PROGRAM_MEM_DATA_BITS = 16

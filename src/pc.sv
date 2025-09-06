@@ -8,6 +8,18 @@
 // > The NZP register value is set by the CMP instruction (based on >/=/< comparison) to
 //   initiate the BRnzp instruction for branching
 //   通过NZP(Negative/Zero/Positive)寄存器实现条件跳转.
+
+/*
+    1. enable: When the PC is enabled (i.e., the thread is active)
+    2. core_state: When the core is in the EXECUTE state (3'b101) or UPDATE state (3'b110)
+    3. decoded_nzp: The NZP bits specified in the BRnzp instruction
+    4. decoded_immediate: The immediate value specified in the BRnzp instruction
+    5. decoded_nzp_write_enable: When the instruction is a CMP instruction (1)
+    6. decoded_pc_mux: When the instruction is a BRnzp instruction (1)
+    7. alu_out: The output from the ALU used to set the NZP register
+    8. current_pc: The current PC value
+*/
+
 module pc #(
     parameter DATA_MEM_DATA_BITS = 8,
     parameter PROGRAM_MEM_ADDR_BITS = 8

@@ -4,6 +4,7 @@
 // INSTRUCTION DECODER
 // > Decodes an instruction into the control signals necessary to execute it
 // > Each core has it's own decoder
+
 module decoder (
     input wire clk,
     input wire reset,
@@ -60,6 +61,16 @@ module decoder (
             decoded_pc_mux <= 0;
             decoded_ret <= 0;
         end else begin
+            /*
+                Instruction Format:
+                15-12: Opcode
+                11-8: Rd (Destination Register)
+                7-4: Rs (Source Register 1)
+                3-0: Rt (Source Register 2) / Unused
+                7-0: Immediate Value (for CONST, BRnzp)
+                11-9: NZP bits (for BRnzp)
+                指令的结构比较固定, 但不同指令使用的字段不同
+            */
             // Decode when core_state = DECODE
             if (core_state == 3'b010) begin
                 // Get instruction signals from instruction every time

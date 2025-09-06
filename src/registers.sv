@@ -4,6 +4,16 @@
 // REGISTER FILE
 // > Each thread within each core has it's own register file with 13 free registers and 3 read-only registers
 // > Read-only registers hold the familiar %blockIdx, %blockDim, and %threadIdx values critical to SIMD
+
+/*
+    Register Map:
+    0-12: Free Registers (R0 - R12)
+    13: %blockIdx (Read-Only)
+    14: %blockDim (Read-Only)
+    15: %threadIdx (Read-Only)
+
+*/
+
 module registers #(
     parameter THREADS_PER_BLOCK = 4,  // 每个块的线程数
     parameter THREAD_ID = 0,  // 当前线程的ID
@@ -14,7 +24,7 @@ module registers #(
     input wire enable, // If current block has less threads then block size, some registers will be inactive
 
     // Kernel Execution
-    input reg [7:0] block_id,
+    input reg [7:0] block_id,  // Current block ID
 
     // State
     input reg [2:0] core_state,

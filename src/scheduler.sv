@@ -64,16 +64,19 @@ module scheduler #(
                 end
                 FETCH: begin
                     // Move on once fetcher_state = FETCHED
+                    // fetcher进入FETCHED状态后, 等待core_state == 3'b010时才会切换回IDLE
                     if (fetcher_state == 3'b010) begin
                         core_state <= DECODE;
                     end
                 end
                 DECODE: begin
                     // Decode is synchronous so we move on after one cycle
+                    // decoder模块每个周期都判断core_state状态, 输出为单纯的组合逻辑
                     core_state <= REQUEST;
                 end
                 REQUEST: begin
                     // Request is synchronous so we move on after one cycle
+
                     core_state <= WAIT;
                 end
                 WAIT: begin
@@ -95,6 +98,7 @@ module scheduler #(
                 end
                 EXECUTE: begin
                     // Execute is synchronous so we move on after one cycle
+                    // alu模块每个周期都判断core_state状态, 输出为单纯的组合逻辑
                     core_state <= UPDATE;
                 end
                 UPDATE: begin

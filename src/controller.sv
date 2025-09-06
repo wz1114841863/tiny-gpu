@@ -5,6 +5,7 @@
 // > Receives memory requests from all cores
 // > Throttles requests based on limited external memory bandwidth
 // > Waits for responses from external memory and distributes them back to cores
+
 module controller #(
     parameter ADDR_BITS = 8,
     parameter DATA_BITS = 16,
@@ -20,6 +21,7 @@ module controller #(
     input reg [ADDR_BITS-1:0] consumer_read_address [NUM_CONSUMERS-1:0],
     output reg [NUM_CONSUMERS-1:0] consumer_read_ready,
     output reg [DATA_BITS-1:0] consumer_read_data [NUM_CONSUMERS-1:0],
+
     input reg [NUM_CONSUMERS-1:0] consumer_write_valid,
     input reg [ADDR_BITS-1:0] consumer_write_address [NUM_CONSUMERS-1:0],
     input reg [DATA_BITS-1:0] consumer_write_data [NUM_CONSUMERS-1:0],
@@ -30,6 +32,7 @@ module controller #(
     output reg [ADDR_BITS-1:0] mem_read_address [NUM_CHANNELS-1:0],
     input reg [NUM_CHANNELS-1:0] mem_read_ready,
     input reg [DATA_BITS-1:0] mem_read_data [NUM_CHANNELS-1:0],
+    
     output reg [NUM_CHANNELS-1:0] mem_write_valid,
     output reg [ADDR_BITS-1:0] mem_write_address [NUM_CHANNELS-1:0],
     output reg [DATA_BITS-1:0] mem_write_data [NUM_CHANNELS-1:0],

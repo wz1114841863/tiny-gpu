@@ -3,6 +3,8 @@ from .logger import logger
 
 
 class Memory:
+    """模拟一个多通道内存模块, 支持读写操作"""
+
     def __init__(self, dut, addr_bits, data_bits, channels, name):
         self.dut = dut
         self.addr_bits = addr_bits
